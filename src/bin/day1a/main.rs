@@ -1,4 +1,8 @@
 use aoc_23::find_ascii_numbers;
+/// Finding ASCII Numeric chars is very easy in Rust as shown in [crate::find_ascii_numbers]
+/// From here its only cominbing the first and last element of the vector to the combined number
+/// this string number can then be parsed in a usize
+/// add all up - thats it
 fn main() {
     let file = std::fs::read_to_string("./src/bin/day1a/input.txt").unwrap();
     let lines = file.lines();
@@ -13,11 +17,11 @@ fn main() {
                 combined_string.push(f.1);
                 combined_string.push(l.1);
                 sum += combined_string.parse::<usize>().unwrap();
-                println!("Sum is {}", sum);
             }
         } else {
             panic!()
         }
     }
-    println!("Final Sum is {}", sum);
+    // After doing it I know now this is the answer - Keep assert for future changes in lib
+    assert!(53080 == sum);
 }
