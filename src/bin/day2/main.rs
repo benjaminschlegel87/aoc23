@@ -15,6 +15,7 @@ fn main() {
         }
     }
     println!("First sum {}", sum);
+    assert!(sum == 2617);
     sum = 0;
     let file = std::fs::read_to_string("./src/bin/day2/input.txt").unwrap();
     let lines = file.lines();
@@ -24,6 +25,7 @@ fn main() {
         sum += res;
     }
     println!("Second sum {}", sum);
+    assert!(sum == 59795);
 }
 
 #[test]

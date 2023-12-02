@@ -14,7 +14,7 @@ name = "day1b"
 path = "src/bin/day1b/main.rs"
 
 [[bin]]
-name = "day2a"
+name = "day2"
 path = "src/bin/day2/main.rs"
 
 [dependencies]

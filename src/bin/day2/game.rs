@@ -60,12 +60,7 @@ impl Game {
 
 fn extract_id(s: &str) -> usize {
     let mut s = String::from(s);
-    s.retain(|c| !c.is_whitespace());
-    s.retain(|c| c != ':');
-    s.retain(|c| c != 'G');
-    s.retain(|c| c != 'a');
-    s.retain(|c| c != 'm');
-    s.retain(|c| c != 'e');
+    s.retain(|c| c.is_ascii_digit());
     s.parse::<usize>().unwrap()
 }
 // " 4 red, 5 green, 2 blue"
