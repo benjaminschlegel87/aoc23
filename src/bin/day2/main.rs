@@ -10,7 +10,7 @@ fn main() {
         // Create a Game from every Line
         let game = Game::new(line);
         let res = game.get_result();
-        if res == true {
+        if res {
             sum += game.get_id();
         }
     }

@@ -36,7 +36,7 @@ pub fn find_string_numbers(s: &str) -> Vec<(usize, char)> {
     let mut current_string = s;
     let mut string_numbers = Vec::new();
     let mut offset = 0;
-    while current_string != "" {
+    while !current_string.is_empty() {
         let num = find_number(current_string);
         if let Some((number, index)) = num {
             // we found a string number in this string part

@@ -60,10 +60,8 @@ fn combine_digits(ascii_numbs: Vec<(usize, char)>, string_numbers: Vec<(usize, c
     let mut combined_string = String::new();
     combined_string.push(first);
     combined_string.push(last);
-    let add = combined_string.parse::<usize>().unwrap();
-    add
+    combined_string.parse::<usize>().unwrap()
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
