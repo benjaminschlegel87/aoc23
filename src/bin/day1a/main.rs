@@ -1,5 +1,5 @@
 use aoc_23::find_ascii_numbers;
-/// Finding ASCII Numeric chars is very easy in Rust as shown in [crate::find_ascii_numbers]
+/// Finding ASCII Numeric chars is very easy in Rust as shown in [find_ascii_numbers]
 /// From here its only cominbing the first and last element of the vector to the combined number
 /// this string number can then be parsed in a usize
 /// add all up - thats it

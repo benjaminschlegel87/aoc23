@@ -22,7 +22,7 @@ pub fn find_ascii_numbers(s: &str) -> Vec<(usize, char)> {
 
 /// Takes a string slice and returns all a vector of  all string endcoded numbers as single digits together with the index where it was found
 ///
-/// This works only for lower case numbers => One will not be found
+/// This works only for lower case numbers => "One" will not be found
 /// # Example
 /// ```
 /// # use aoc_23::find_string_numbers;
