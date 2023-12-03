@@ -64,6 +64,7 @@ fn main() {
 // Finde alle Symbole und gebe ihnen einen x/y Wert Reihe/Position
 // Finde alle Zahlen und mache ermittle dabei alle validen Symbol Koordinaten
 // added die Zahl nur wenn sich ein Symbol in den validen Koordinaten befindet
+#[cfg(test)]
 const EXAMPLE: &str = "
 467..114..
 ...*......
@@ -93,6 +94,7 @@ struct Symbol {
     coord: SymbolCoordinate,
 }
 impl Symbol {
+    #[cfg(test)]
     pub fn new(c: char, row: usize, pos: usize) -> Self {
         Self {
             symbol: c,
@@ -116,12 +118,7 @@ fn extract_numbers_from_line(s: &str, row: usize) -> Vec<Numbers> {
             let split = remain.split_at(number.1 + number.0.len());
             remain = split.1;
 
-            let min_index;
-            if index > 0 {
-                min_index = index - 1;
-            } else {
-                min_index = index;
-            }
+            let min_index = if index > 0 { index - 1 } else { index };
             let max_index = index + number.0.len();
             // min index | Number | max index => lower an upper bounds
             result.push(Numbers {
@@ -141,17 +138,15 @@ fn extract_number(s: &str) -> Option<(String, usize)> {
     let mut start_index = 0;
     for (i, c) in s.chars().enumerate() {
         if c.is_numeric() {
-            if numb.len() == 0 {
+            if numb.is_empty() {
                 start_index = i;
             }
             numb.push(c);
-        } else {
-            if numb.len() > 0 {
-                break;
-            }
+        } else if !numb.is_empty() {
+            break;
         }
     }
-    if numb.len() > 0 {
+    if !numb.is_empty() {
         Some((numb, start_index))
     } else {
         None
