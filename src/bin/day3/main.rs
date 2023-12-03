@@ -1,3 +1,5 @@
+use core::num;
+
 fn main() {
     let file = std::fs::read_to_string("./src/bin/day3/input.txt").unwrap();
 
@@ -8,12 +10,12 @@ fn main() {
         numbers.push(extract_numbers_from_line(s, i + 1));
     }
     let mut sum = 0;
-    for nums in numbers {
+    for nums in &numbers {
         for n in nums {
-            for coords in n.symbol_pos {
+            for coords in &n.symbol_pos {
                 // check for this number if any possible position is in the symbol position
                 for symbol in &symbols.symbols {
-                    if symbol.coord == coords {
+                    if symbol.coord == *coords {
                         //Add
                         sum += n.number;
                         break;
@@ -23,7 +25,39 @@ fn main() {
         }
     }
     println!("{sum}");
-    assert!(sum == 540131);
+    //assert!(sum == 540131);
+
+    let mut total_gear = 0;
+    for symbol in &symbols.symbols {
+        if symbol.symbol == '*' {
+            let mut cnt = 0;
+            let mut gear_score = 0;
+            for nums in &numbers {
+                for n in nums {
+                    for coords in &n.symbol_pos {
+                        if *coords == symbol.coord {
+                            println!("Match at {:?} for number {}", coords, n.number);
+                            cnt += 1;
+                            if cnt == 1 {
+                                gear_score = n.number;
+                            }
+                            if cnt == 2 {
+                                gear_score *= n.number;
+                            }
+                            if cnt > 2 {
+                                gear_score = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            if cnt == 1 {
+                gear_score = 0;
+            }
+            total_gear += gear_score;
+        }
+    }
+    println!("{total_gear}");
 }
 
 // jeder Reihe hat eine konstante Anzahl
