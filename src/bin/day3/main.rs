@@ -1,5 +1,3 @@
-use core::num;
-
 fn main() {
     let file = std::fs::read_to_string("./src/bin/day3/input.txt").unwrap();
 
@@ -25,7 +23,7 @@ fn main() {
         }
     }
     println!("{sum}");
-    //assert!(sum == 540131);
+    assert!(sum == 540131);
 
     let mut total_gear = 0;
     for symbol in &symbols.symbols {
@@ -36,7 +34,6 @@ fn main() {
                 for n in nums {
                     for coords in &n.symbol_pos {
                         if *coords == symbol.coord {
-                            println!("Match at {:?} for number {}", coords, n.number);
                             cnt += 1;
                             if cnt == 1 {
                                 gear_score = n.number;
@@ -58,6 +55,7 @@ fn main() {
         }
     }
     println!("{total_gear}");
+    assert!(total_gear == 86879020);
 }
 
 // jeder Reihe hat eine konstante Anzahl
