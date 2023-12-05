@@ -9,8 +9,8 @@ Advent of Code 2023 in Rust
 - [x] Day 3 Part 2
 - [x] Day 4 Part 1
 - [x] Day 4 Part 2
-- [ ] Day 5 Part 1
-- [ ] Day 5 Part 2
+- [x] Day 5 Part 1
+- [x] Day 5 Part 2
 - [ ] Day 6 Part 1
 - [ ] Day 6 Part 2
 - [ ] Day 7 Part 1

@@ -1,4 +1,3 @@
-use std::{borrow::BorrowMut, ops::Range, sync::Mutex};
 fn main() {
     let file = std::fs::read_to_string("./src/bin/day5/input.txt").unwrap();
     // parse input file to type holding all relevant informations integers
@@ -8,36 +7,79 @@ fn main() {
     let all_maps = split_in_maps(&file);
     let mut min_location: Vec<usize> = Vec::new();
     let mut handles = Vec::new();
-
+    let mut seed_range = Vec::new();
+    let mut start = None;
+    // PART 1
     for s in seeds {
         let maps = all_maps.clone();
-        handles.push(std::thread::spawn(move || calc_seed(s, maps)));
+        handles.push(std::thread::spawn(move || calc_seed(s, &maps)));
     }
     for handle in handles.into_iter() {
         min_location.push(handle.join().unwrap());
     }
     let res = min_location.into_iter().min().unwrap();
     assert!(res == 323142486);
+
+    // PART 2
+    let seeds = parse_seed_numbers(line).unwrap();
+    let mut handles = Vec::new();
+    let mut min_location: Vec<usize> = Vec::new();
+    for s in &seeds {
+        if start.is_none() {
+            start = Some(*s);
+        } else {
+            seed_range.push(start.unwrap()..(start.unwrap() + *s));
+            start = None;
+        }
+    }
+    println!(" Seed range {:?}", seed_range);
+
+    for (num, s) in seed_range.into_iter().enumerate() {
+        let maps = all_maps.clone();
+        let len = s.len();
+        handles.push(std::thread::spawn(move || {
+            println!("Spawned Range {num} with total len {len}");
+            //let mut min = Vec::new();
+            let mut res = usize::MAX;
+            for (n, i) in s.clone().enumerate() {
+                //   min.push(calc_seed(i, m));
+                let temp = calc_seed(i, &maps);
+                if temp < res {
+                    res = temp;
+                }
+                if n % 10_000_000 == 0 {
+                    println!("Done {n}/{len} seeds in Range {num}");
+                }
+            }
+            //let min = min.into_iter().min().unwrap();
+            println!("Finished Range {num} with {}", res);
+            //min
+            res
+        }));
+    }
+    for handle in handles.into_iter() {
+        min_location.push(handle.join().unwrap());
+    }
+    let res = min_location.into_iter().min().unwrap();
+    println!("Result {res}");
+    assert!(res == 79874951)
 }
 
-fn calc_seed(seed: usize, mut all_maps: Vec<Vec<Map>>) -> usize {
-    println!("Working on {seed}");
-    let location_map = all_maps.pop().unwrap();
-    let humidity_map = all_maps.pop().unwrap();
-    let temperature_map = all_maps.pop().unwrap();
-    let light_map = all_maps.pop().unwrap();
-    let water_map = all_maps.pop().unwrap();
-    let fertalizer_map = all_maps.pop().unwrap();
-    let soil_map = all_maps.pop().unwrap();
-    let soil = transform_by_map(seed, soil_map.as_ref());
-    let fertalizer = transform_by_map(soil, fertalizer_map.as_ref());
-    let water = transform_by_map(fertalizer, water_map.as_ref());
-    let light = transform_by_map(water, light_map.as_ref());
-    let temp = transform_by_map(light, temperature_map.as_ref());
-    let humidity = transform_by_map(temp, humidity_map.as_ref());
-    let location = transform_by_map(humidity, location_map.as_ref());
-    eprintln!("LOCATION: {location}");
-    location
+fn calc_seed(seed: usize, all_maps: &[Vec<Map>]) -> usize {
+    let location_map = all_maps.get(6).unwrap();
+    let humidity_map = all_maps.get(5).unwrap();
+    let temperature_map = all_maps.get(4).unwrap();
+    let light_map = all_maps.get(3).unwrap();
+    let water_map = all_maps.get(2).unwrap();
+    let fertalizer_map = all_maps.get(1).unwrap();
+    let soil_map = all_maps.get(0).unwrap();
+    let soil = transform_by_map(seed, soil_map);
+    let fertalizer = transform_by_map(soil, fertalizer_map);
+    let water = transform_by_map(fertalizer, water_map);
+    let light = transform_by_map(water, light_map);
+    let temp = transform_by_map(light, temperature_map);
+    let humidity = transform_by_map(temp, humidity_map);
+    transform_by_map(humidity, location_map)
 }
 
 fn parse_seed_numbers(s: &str) -> Option<Vec<usize>> {
@@ -66,7 +108,7 @@ fn split_in_maps(s: &str) -> Vec<Vec<Map>> {
     for (i, map_string) in s.split("map:").enumerate() {
         if i != 0 {
             let mut str = map_string.to_string();
-            str.retain(|c| if c.is_ascii_alphabetic() { false } else { true });
+            str.retain(|c| !c.is_ascii_alphabetic());
 
             let str = str.trim();
             let mut maps = Vec::new();
@@ -89,7 +131,6 @@ fn split_in_maps(s: &str) -> Vec<Vec<Map>> {
                 }
             }
             all_maps.push(maps);
-        } else {
         }
     }
     all_maps
@@ -150,17 +191,19 @@ fn test_parse_all() {
     let mut min_location = Vec::new();
     for s in seeds {
         let soil = transform_by_map(s, soil_map.as_ref().unwrap());
-        eprintln!("{soil}");
+        eprintln!("s {soil}");
         let fertalizer = transform_by_map(soil, fertalizer_map.as_ref().unwrap());
-        eprintln!("{fertalizer}");
+        eprintln!("f {fertalizer}");
         let water = transform_by_map(fertalizer, water_map.as_ref().unwrap());
-        eprintln!("{water}");
+        eprintln!("w {water}");
         let light = transform_by_map(water, light_map.as_ref().unwrap());
-        eprintln!("{light}");
+        eprintln!("l {light}");
         let temp = transform_by_map(light, temperature_map.as_ref().unwrap());
-        eprintln!("{temp}");
+        eprintln!("t {temp}");
         let humidity = transform_by_map(temp, humidity_map.as_ref().unwrap());
-        eprintln!("{humidity}");
+        eprintln!("h {humidity}");
+        let location = transform_by_map(humidity, location_map.as_ref().unwrap());
+        eprintln!("lo {location}");
         let location = transform_by_map(humidity, location_map.as_ref().unwrap());
         min_location.push(location);
     }
@@ -172,19 +215,10 @@ fn transform_by_map(val: usize, map: &Vec<Map>) -> usize {
     for m in map {
         // This contains is very important for getting this computed in a reasonable time
         // iterating over all ranges takes forever
-        if (m.source..(m.source + m.range)).contains(&val) {
-            let s = (m.source..(m.source + m.range)).find(|x| *x == val);
-            if let Some(num) = s {
-                if dest.is_none() {
-                    // val is in the source range of this map
-                    // look up
-                    dest = Some(m.dest + (num - m.source));
-                    break;
-                } else {
-                    panic!("Should not happen that we find two matches");
-                }
-            }
-        } else {
+        let range = m.source..(m.source + m.range);
+        if range.contains(&val) {
+            let x = val - m.source;
+            dest = Some(m.dest + x);
         }
     }
     if dest.is_none() {
@@ -193,15 +227,6 @@ fn transform_by_map(val: usize, map: &Vec<Map>) -> usize {
     }
 
     dest.unwrap()
-}
-
-fn search_seed_dest(mut range: Range<usize>, val: usize) -> Option<usize> {
-    let s = range.find(|x| *x == val);
-    if let Some(num) = s {
-        Some(num)
-    } else {
-        None
-    }
 }
 
 #[cfg(test)]
