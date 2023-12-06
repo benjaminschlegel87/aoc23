@@ -145,7 +145,9 @@ impl CardStrings {
 }
 impl Card {
     fn new(card: CardStrings) -> Self {
-        let card_num = remove_non_numeric(&card.card_num).parse::<usize>().unwrap();
+        let card_num = aoc_23::remove_non_numeric(&card.card_num)
+            .parse::<usize>()
+            .unwrap();
         let mut winners = Vec::new();
 
         for win in card.winners.split(' ') {
@@ -172,16 +174,6 @@ impl Card {
             numbers,
         }
     }
-}
-
-fn remove_non_numeric(s: &str) -> String {
-    let mut res = String::new();
-    for c in s.chars() {
-        if c.is_numeric() {
-            res.push(c);
-        }
-    }
-    res
 }
 
 #[test]

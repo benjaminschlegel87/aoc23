@@ -96,6 +96,16 @@ fn get_number_from_string(s: &str) -> char {
     }
 }
 
+pub fn remove_non_numeric(s: &str) -> String {
+    let mut res = String::new();
+    for c in s.chars() {
+        if c.is_numeric() {
+            res.push(c);
+        }
+    }
+    res
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
