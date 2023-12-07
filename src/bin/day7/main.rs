@@ -3,7 +3,16 @@ fn main() {
 
     let hands = parse_hands(&file);
     let sorted = sort_hands(hands);
-    println!("Result {}", sorted.calc_total_winnings());
+    let result = sorted.calc_total_winnings();
+    println!("Result {}", result);
+    assert_eq!(248396258, result);
+
+    let hands = parse_hands(&file);
+    let hands = modify_hands_with_joker(hands);
+    let sorted = sort_hands(hands);
+    let result = sorted.calc_total_winnings();
+    println!("Result {}", result);
+    assert_eq!(246436046, result);
 }
 
 #[cfg(test)]
@@ -28,6 +37,7 @@ enum Label {
     Four = 4,
     Three = 3,
     Two = 2,
+    Joker = 1,
 }
 
 impl From<char> for Label {
@@ -80,11 +90,7 @@ fn check_hand_type(hand: &[Label; 5]) -> HandType {
 
         if cnt > 1 {
             // Check if the label was already found
-            if label_cnt
-                .iter()
-                .find(|&&found_label| found_label.1 == *label)
-                .is_none()
-            {
+            if !label_cnt.iter().any(|&found_label| found_label.1 == *label) {
                 // At Least a pair
                 label_cnt.push((cnt - 1, *label));
             }
@@ -95,7 +101,7 @@ fn check_hand_type(hand: &[Label; 5]) -> HandType {
         0 => HandType::HighCard,
         // Found atleast two cards of the same label - two ore more
         1 => {
-            let (cnt, label) = label_cnt.pop().unwrap();
+            let (cnt, _label) = label_cnt.pop().unwrap();
             match cnt {
                 1 => HandType::OnePair,
                 2 => HandType::ThreeOfAKind,
@@ -106,8 +112,8 @@ fn check_hand_type(hand: &[Label; 5]) -> HandType {
         }
         // Found atleast for two labels more than two cards - FullHouse or TwoPair
         2 => {
-            let (cnt_1, label_1) = label_cnt.pop().unwrap();
-            let (cnt_2, label_2) = label_cnt.pop().unwrap();
+            let (cnt_1, _label_1) = label_cnt.pop().unwrap();
+            let (cnt_2, _label_2) = label_cnt.pop().unwrap();
             if cnt_1 > 1 || cnt_2 > 1 {
                 HandType::FullHouse
             } else {
@@ -138,8 +144,71 @@ fn parse_hands(all_hands: &str) -> Vec<Hand> {
     }
     hands
 }
+#[derive(Debug)]
 struct SortedHands {
     hands: Vec<Hand>,
+}
+fn modify_hands_with_joker(mut hands: Vec<Hand>) -> Vec<Hand> {
+    for h in &mut hands {
+        *h = h.modify_with_joker();
+    }
+    hands
+}
+impl Hand {
+    fn modify_with_joker(mut self) -> Self {
+        let mut joker_cnt = 0;
+        for label in &mut self.label {
+            if *label == Label::J {
+                *label = Label::Joker;
+                joker_cnt += 1;
+            }
+        }
+
+        match self.hand_type {
+            HandType::HighCard => match joker_cnt {
+                0 => (),                                 // no joker no upgrade
+                1 => self.hand_type = HandType::OnePair, // one joker promote to OnePair
+                _ => panic!(), // impossible more than 1 joker would be OnePair atleast
+            },
+            HandType::OnePair => match joker_cnt {
+                0 => (),                                      // no joker no upgrade
+                1 => self.hand_type = HandType::ThreeOfAKind, // One Joker promotes to ThreeofAKind
+                2 => self.hand_type = HandType::ThreeOfAKind, // Two Jokers is the pair promotes any card to ThreeOfAKind
+                _ => panic!(),
+            },
+            HandType::TwoPair => match joker_cnt {
+                0 => (),                                     // no joker no upgrade
+                1 => self.hand_type = HandType::FullHouse,   // Promotes to FUll House
+                2 => self.hand_type = HandType::FourOfAKind, // Two Promotes to FourOfAKind
+                _ => panic!(),
+            },
+            HandType::ThreeOfAKind => match joker_cnt {
+                0 => (), // no joker no upgrade
+                1 => self.hand_type = HandType::FourOfAKind,
+                3 => self.hand_type = HandType::FourOfAKind, // if I got three jokers I can also promote to FourOfAKind
+                _ => panic!(),
+            },
+            HandType::FullHouse => match joker_cnt {
+                0 => (), // no joker no upgrade
+                2 => self.hand_type = HandType::FiveOfAKind,
+                3 => self.hand_type = HandType::FiveOfAKind,
+                _ => panic!(),
+            },
+            HandType::FourOfAKind => match joker_cnt {
+                0 => (), // no joker no upgrade
+                1 => self.hand_type = HandType::FiveOfAKind,
+                4 => self.hand_type = HandType::FiveOfAKind,
+                _ => panic!(),
+            },
+            HandType::FiveOfAKind => match joker_cnt {
+                0 => (),
+                5 => (),
+                _ => panic!(),
+            },
+        }
+
+        self
+    }
 }
 
 impl SortedHands {
@@ -286,4 +355,12 @@ fn test_sorted_hands() {
         eprintln!("{:?}", s);
     }
     assert_eq!(6440, sorted.calc_total_winnings());
+}
+
+#[test]
+fn test_modify_with_joker() {
+    let hands = parse_hands(EXAMPLE);
+    let hands = modify_hands_with_joker(hands);
+    let sorted = sort_hands(hands);
+    assert_eq!(sorted.calc_total_winnings(), 5905)
 }
